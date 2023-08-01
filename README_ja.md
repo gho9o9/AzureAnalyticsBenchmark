@@ -22,8 +22,8 @@
   以下のコマンドを実行します。ここではデータ生成用の Storage と Databricks（Standard SKU） もデプロイされます。
   ```bash
   az account set --subscription "YourSubscriptionName"
-  git clone https://github.com/gho9o9/AzureAnalyticsBenchmark.git
-  cd "AzureAnalyticsBenchmark/Labs/Module 1"
+  git clone https://github.com/gho9o9/Azure-Synapse-TPC-DS-Benchmark-Testing.git
+  cd "Azure-Synapse-TPC-DS-Benchmark-Testing/Labs/Module 1"
   bash provisionServices.sh <serviceNamePrefix>
   bash configEnvironment.sh
   ```
@@ -48,7 +48,7 @@
 生成するデータ量（GB単位）をパラメータで指定し tpcdsDataGeneration.sh を実行します。
 
 ```bash
-cd "AzureAnalyticsBenchmark/Labs/Module 2"
+cd "Azure-Synapse-TPC-DS-Benchmark-Testing/Labs/Module 2"
 # データ量 10 GB を指定
 bash tpcdsDataGeneration.sh 10
 ```
