@@ -1,14 +1,14 @@
 # 1. はじめに
 
-本ドキュメントは TPC-DS ベンチマークのためのリソース一式を提供します。
+本ドキュメントは簡易 TPC-DS ベンチマークのためのリソース一式を提供します。
 - データ
 - スキーマ定義
 - クエリ
 - ベンチマークスクリプト
-- 環境構築～ベンチマーク手順
+- 環境構築～ベンチマークまでの手順
 
 ### TPC-DSとは
-[TPC（トランザクション処理性能評議会）](https://www.tpc.org/information/who/whoweare5.asp)が定める各種ベンチマークテストの一部で **ビッグデータ基盤向けのベンチマーク**（[Specはココ](https://www.tpc.org/tpc_documents_current_versions/current_specifications5.asp)） に利用されるテスト定義。
+[TPC（トランザクション処理性能評議会）](https://www.tpc.org/information/who/whoweare5.asp)が定める各種ベンチマークテストの一部で **データウェアハウス向けのベンチマーク**（[Specはココ](https://www.tpc.org/tpc_documents_current_versions/current_specifications5.asp)） に利用されるテスト定義です。これには極めてシンプルな集計から複雑なパターンマイニングまで、さまざまな複雑さを持つ 99 のクエリが含まれています。TPC-DS は複雑さが増す分析を反映した 2000 年代半ばからスタートした比較的新たな取り組みのベンチマークになっており、この 20 年間でデータウェアハウスのベンチマークの事実上の標準といえます。
 
 ![](https://media.licdn.com/dms/image/D5612AQFX40GrSqn35w/article-inline_image-shrink_1500_2232/0/1654724687488?e=1695859200&v=beta&t=mSSSgM8x_eTkwxp0zEYFAC45Yva9k_ANia85IHBTAK4)
 
@@ -19,7 +19,7 @@
 ベンチマーク対象とする各リソースをデプロイします。
 
 ### Synapse Serverless SQL と Synapse Dedicated SQL  
-  以下のコマンドを実行します。ここではデータ生成用の Storage と Databricks（Standard SKU） もデプロイされます。
+  以下のコマンドを実行します。ここではデータ生成用の Storage と Databricks（Standard SKU） もデプロイしています。
   ```bash
   az account set --subscription "YourSubscriptionName"
   git clone https://github.com/gho9o9/AzureAnalyticsBenchmark.git
@@ -259,7 +259,7 @@ WITH (CREDENTIAL=(IDENTITY= 'Storage Account Key', SECRET='<secret>'), FILE_TYPE
 ```
 
 ### Fabric Lakehouse
-データロードノートブック内のストレージアカウント名とデータソースへのパスを環境に応じて適宜修正したのち、ノートブックを順次実行します。該当スクリプトは冪等で実装されているため、テストデータを格納するストレージロケーションやデータサイズの変更時などで繰り返し実行可能です。  
+データロード内のストレージアカウント名とデータソースへのパスを環境に応じて適宜修正したのち、ノートブックに貼り付け順次実行します。該当スクリプトは冪等で実装されているため、テストデータを格納するストレージロケーションやデータサイズの変更時などで繰り返し実行可能です。  
 
 - [1. クリーンアップ](https://app.fabric.microsoft.com/groups/70bb9150-59cd-4789-af81-b5835704bbca/synapsenotebooks/18b3bb71-7daf-48ed-b2b5-cfd37aae6a2d?experience=data-warehouse)
 - [2. スキーマ定義 & データロード](https://app.fabric.microsoft.com/groups/70bb9150-59cd-4789-af81-b5835704bbca/synapsenotebooks/ae6afd8a-1b03-45eb-a969-bb4135032ba3?experience=data-warehouse)
@@ -296,6 +296,7 @@ DROP TABLE IF EXISTS web_site;
 # PySpark
 from pyspark.sql.types import *
 
+# 事前に TPCDS データを格納したストレージを Fabrick Lakehouse へショートカットとしてアタッチし、アタッチしたストレージを Onelake 経由で Read しています。
 def loadFullDataFromSource(table_name):
     df = spark.read.parquet("abfss://<workspace>@onelake.dfs.fabric.microsoft.com/<item>/Files/tpcds/raw/tpc-ds/source_files_<data path>_parquet/" + table_name)
     df.write.mode("overwrite").format("delta").saveAsTable(table_name)
@@ -509,17 +510,18 @@ FILEFORMAT = PARQUET;
 - [sqlcmd](https://learn.microsoft.com/ja-jp/sql/linux/sql-server-linux-setup-tools?view=sql-server-ver16&tabs=ubuntu-install#install-tools-on-linux)
 - [Databricks SQL CLI](https://pypi.org/project/databricks-sql-cli/)
 
-Databricks SQL CLI については[このページ](https://qiita.com/taka_yayoi/items/0f75e9d2e4578ff652d6)を参考に認証情報を設定ファイルにて事前設定します。
+Databricks SQL CLI については[このページ](https://qiita.com/taka_yayoi/items/0f75e9d2e4578ff652d6)を参考に設定ファイルに認証情報を事前登録しておきます。
 
 ## ベンチマーク条件
-- シングルユーザモードでのクエリ応答時間を測定
-- TPCDS の各 SQL をサンプリング4回で順次実行
-- SQL 実行は sqlcmd および dbsqlcli を利用し該当コマンドの処理時間を time コマンドで記録
+- シングルユーザから全クエリごと応答時間を測定
+- 各クエリはサンプリング4回で順次実行
+- クエリ実行は sqlcmd および dbsqlcli を利用し該当コマンドの処理時間を time コマンドで記録
+- データベースの暖機はしない（データロード直後の状態に対してベンチマークを実行）。
 
 ## ベンチマーク実行
 以下のスクリプトを実行すると「./log/benchmark.csv」に実行ログが出力されます。
 ```bash
-cd "Azure-Synapse-TPC-DS-Benchmark-Testing/Benchmark"
+cd "AzureAnalyticsBenchmark/Benchmark"
 bash benchmark.sh <aaduser> <password>
 ```
 
