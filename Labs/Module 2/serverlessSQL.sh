@@ -23,7 +23,7 @@ synapseAnalyticsSQLLoadingUser="LoadingUser"
 synapseAnalyticsSQLAdminPassword="Pass@word123"
 datalakeName=$(terraform output -state=Terraform/terraform.tfstate -raw datalake_name 2>&1)
 #datalakeName="tpcdsacctpoc"
-datalakeContainer='raw\/tpc-ds\/source_files_001GB_parquet'
+datalakeContainer='raw\/tpc-ds\/source_files_100GB_parquet'
 
 echo "Generating the TPCDS Demo Data database using Synapse Serverless SQL ..." 
 

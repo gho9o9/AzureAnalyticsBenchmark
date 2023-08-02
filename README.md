@@ -19,25 +19,31 @@
 ベンチマーク対象とする各リソースをデプロイします。
 
 ### Synapse Serverless SQL と Synapse Dedicated SQL  
-  以下のコマンドを実行します。ここではデータ生成用の Storage と Databricks（Standard SKU） もデプロイしています。
-  ```bash
-  az account set --subscription "YourSubscriptionName"
-  git clone https://github.com/gho9o9/AzureAnalyticsBenchmark.git
-  cd "AzureAnalyticsBenchmark/Labs/Module 1"
-  bash provisionServices.sh <serviceNamePrefix>
-  bash configEnvironment.sh
-  ```
-  ![](images/o9o9_2023-08-02-22-49-55.png)  
-  ![](images/o9o9_2023-08-02-22-50-18.png)  
-  ![](images/o9o9_2023-07-31-15-06-17.png)  
+以下のコマンドを実行します。ここではデータ生成用の Storage と Databricks（Standard SKU） もデプロイしています。
+```bash
+az account set --subscription "YourSubscriptionName"
+git clone https://github.com/gho9o9/AzureAnalyticsBenchmark.git
+cd "AzureAnalyticsBenchmark/Labs/Module 1"
+bash provisionServices.sh <serviceNamePrefix>
+```
+
+[configEnvironment.sh:L120](https://github.com/gho9o9/Azure-Synapse-TPC-DS-Benchmark-Testing/blob/bd6e976f41b245df7bee32a6acce2509488c5bcd/Labs/Module%202/serverlessSQL.sh#L26) の datalakeContainer 変数で示されるデータソースへのパスを環境に応じて適宜修正したのちスクリプトを実行します。
+```bash
+code configEnvironment.sh
+bash configEnvironment.sh
+```
+
+![](images/o9o9_2023-08-02-22-49-55.png)  
+![](images/o9o9_2023-08-02-22-50-18.png)  
+![](images/o9o9_2023-07-31-15-06-17.png)  
 
 ### Fabric Warehouse と Fabric Lakehouse
-  Fabric GUI からそれぞれのリソースをデプロイします。
-  ![](images/o9o9_2023-07-31-15-08-21.png)
+Fabric GUI からそれぞれのリソースをデプロイします。
+![](images/o9o9_2023-07-31-15-08-21.png)
 
 ### Databricks SQL
-  Azure Portal から Databricks（Premium SKU）をデプロイします。Databricks SQL には Premium SKU が必要です。
-  ![](images/o9o9_2023-07-31-15-10-39.png)
+Azure Portal から Databricks（Premium SKU）をデプロイします。Databricks SQL には Premium SKU が必要です。
+![](images/o9o9_2023-07-31-15-10-39.png)
   
 ## 2-2. データ生成
 
