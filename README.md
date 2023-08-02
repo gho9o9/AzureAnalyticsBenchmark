@@ -27,7 +27,9 @@
   bash provisionServices.sh <serviceNamePrefix>
   bash configEnvironment.sh
   ```
-  ![](images/o9o9_2023-07-31-15-06-17.png)
+  ![](images/o9o9_2023-08-02-22-49-55.png)  
+  ![](images/o9o9_2023-08-02-22-50-18.png)  
+  ![](images/o9o9_2023-07-31-15-06-17.png)  
 
 ### Fabric Warehouse と Fabric Lakehouse
   Fabric GUI からそれぞれのリソースをデプロイします。
@@ -37,7 +39,6 @@
   Azure Portal から Databricks（Premium SKU）をデプロイします。Databricks SQL には Premium SKU が必要です。
   ![](images/o9o9_2023-07-31-15-10-39.png)
   
-
 ## 2-2. データ生成
 
 <!-- 
@@ -53,6 +54,9 @@ cd "AzureAnalyticsBenchmark/Labs/Module 2"
 bash tpcdsDataGeneration.sh 10
 ```
 
+![](images/o9o9_2023-08-02-23-29-52.png)  
+![](images/o9o9_2023-08-02-23-31-51.png)  
+
 参考：スケールに応じたデータ件数とサイズ
 ![](https://media.licdn.com/dms/image/D5612AQEBRda1pnSpnA/article-inline_image-shrink_1500_2232/0/1654805954089?e=1695859200&v=beta&t=uZ9wUBfXodX3Ly0eaTAeTLJJV-4-UwXiiksyjSbrFI8)
 
@@ -60,15 +64,31 @@ bash tpcdsDataGeneration.sh 10
 
 ### Synapse Serverless SQL
 [serverlessSQL.sh:L26](https://github.com/gho9o9/Azure-Synapse-TPC-DS-Benchmark-Testing/blob/bd6e976f41b245df7bee32a6acce2509488c5bcd/Labs/Module%202/serverlessSQL.sh#L26) の datalakeContainer 変数で示されるデータソースへのパスを環境に応じて適宜修正したのちスクリプトを実行します。該当スクリプトは冪等で実装されているため、テストデータを格納するストレージロケーションやデータサイズの変更時などで繰り返し実行可能です。  
+
+```bash
+cd "AzureAnalyticsBenchmark/Labs/Module 3"
+code serverlessSQL.sh
+```
+![](images/o9o9_2023-08-02-23-35-17.png)  
+
 ```bash
 bash serverlessSQL.sh
 ```
+![](images/o9o9_2023-08-02-23-36-25.png)  
+![](images/o9o9_2023-08-02-23-38-58.png)  
 
 ### Synapse Dedicated SQL 
 Synapse Pipeline「LoadTPCDS」のアクティビティ「Lookup - Create External Tables」の設定->クエリ について、クエリ内で示されるデータソースへのパスを環境に応じて適宜修正したのち [sqlPoolDataLoading.sh](https://github.com/gho9o9/Azure-Synapse-TPC-DS-Benchmark-Testing/blob/main/Labs/Module%202/sqlPoolDataLoading.sh) を実行します。該当スクリプトは冪等で実装されているため、テストデータを格納するストレージロケーションやデータサイズの変更時などで繰り返し実行可能です。  
+![](images/o9o9_2023-08-02-23-41-48.png)  
+
 ```bash
 bash sqlPoolDataLoading.sh
 ```
+![](images/o9o9_2023-08-02-23-54-18.png)  
+
+スクリプトはスキーマ定義＆データロード用のパイプラインをキックしています。このパイプラインの完了を待ち合わせます。
+★★★★★★★★
+
 なお、上記のスクリプト実行により各テーブルの分散ポリシーは以下の通りに定義されています。
 ```SQL
 CREATE TABLE [TPCDS].[call_center] WITH ( DISTRIBUTION  = REPLICATE, CLUSTERED INDEX (cc_call_center_sk)) AS SELECT * FROM [stagingTPCDS].[call_center_ext];
@@ -96,6 +116,8 @@ CREATE TABLE [TPCDS].[web_returns] WITH ( DISTRIBUTION  = HASH(wr_item_sk), CLUS
 CREATE TABLE [TPCDS].[web_sales] WITH ( DISTRIBUTION  = HASH(ws_item_sk), CLUSTERED COLUMNSTORE INDEX) AS SELECT * FROM [stagingTPCDS].[web_sales_ext];
 CREATE TABLE [TPCDS].[web_site] WITH ( DISTRIBUTION  = REPLICATE, CLUSTERED INDEX (web_site_sk)) AS SELECT * FROM [stagingTPCDS].[web_site_ext];
 ```
+
+※ スクリプトの実行がエラーになる場合は AKV のアクセスポリシーでサービスプリンシパルがシークレットアクセスできるよう再構成した後に再実行してみてください。
 
 ### Fabric Warehouse
 データロードスクリプト内のストレージアカウント名とデータソースへのパスを環境に応じて適宜修正したのちクエリを順次実行します。該当スクリプトは冪等で実装されているため、テストデータを格納するストレージロケーションやデータサイズの変更時などで繰り返し実行可能です。  
@@ -546,5 +568,5 @@ bash benchmark.sh <aaduser> <password>
 
 ## リファレンス
 - [Automated TPC-DS Benchmark Testing with Azure Synapse Analytics](https://www.linkedin.com/pulse/automated-tpc-ds-benchmark-testing-azure-synapse-analytics-wang/)
-- [Azure-Synapse-TPC-DS-Benchmark-Testing](https://github.com/gho9o9/Azure-Synapse-TPC-DS-Benchmark-Testing)
+- [Azure-Synapse-TPC-DS-Benchmark-Testing](https://github.com/swanguni/Azure-Synapse-TPC-DS-Benchmark-Testing)
 - [Azure Synapse Serverless vs Databricks SQL Analytics (as of August 2021)](https://www.dataplatformschool.com/blog/synapse-databricks-benchmark/)
