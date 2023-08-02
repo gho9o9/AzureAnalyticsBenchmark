@@ -20,22 +20,30 @@
 
 ### Synapse Serverless SQL と Synapse Dedicated SQL  
 以下のコマンドを実行します。ここではデータ生成用の Storage と Databricks（Standard SKU） もデプロイしています。
+
 ```bash
 az account set --subscription "YourSubscriptionName"
 git clone https://github.com/gho9o9/AzureAnalyticsBenchmark.git
 cd "AzureAnalyticsBenchmark/Labs/Module 1"
 bash provisionServices.sh <serviceNamePrefix>
 ```
+![](images/o9o9_2023-08-03-02-00-42.png)
 
-[configEnvironment.sh:L120](https://github.com/gho9o9/Azure-Synapse-TPC-DS-Benchmark-Testing/blob/bd6e976f41b245df7bee32a6acce2509488c5bcd/Labs/Module%202/serverlessSQL.sh#L26) の datalakeContainer 変数で示されるデータソースへのパスを環境に応じて適宜修正したのちスクリプトを実行します。
+次に [configEnvironment.sh:L120](https://github.com/gho9o9/AzureAnalyticsBenchmark/blob/1397e7d9b34e3150c9150b85c8ae7ee492b69c12/Labs/Module%201/configEnvironment.sh#L120) の datalakeContainer 変数で示されるデータソースへのパスをテストデータのスケールに応じて適宜修正します。
+> 例：スケールを 100（100 GB） とした場合
+> datalakeContainer='raw\/tpc-ds\/source_files_100GB_parquet'
+
 ```bash
 code configEnvironment.sh
+```
+![](images/o9o9_2023-08-03-02-01-35.png)
+
+スケールを修正した後スクリプトを実行します。
+```bash
 bash configEnvironment.sh
 ```
-
-![](images/o9o9_2023-08-02-22-49-55.png)  
 ![](images/o9o9_2023-08-02-22-50-18.png)  
-![](images/o9o9_2023-07-31-15-06-17.png)  
+![](images/o9o9_2023-08-03-02-04-13.png)  
 
 ### Fabric Warehouse と Fabric Lakehouse
 Fabric GUI からそれぞれのリソースをデプロイします。
@@ -49,10 +57,10 @@ Azure Portal から Databricks（Premium SKU）をデプロイします。Databr
 
 <!-- 
 ### スケール設定
-[tpcdsDataGeneration.sh:L76](https://github.com/gho9o9/Azure-Synapse-TPC-DS-Benchmark-Testing/blob/f837ddfdf84b3cd66c673a7092488262f81c4fb0/Labs/Module%202/tpcdsDataGeneration.sh#L76) の scaleFactor（GB単位）で設定
+[tpcdsDataGeneration.sh:L78](https://github.com/gho9o9/AzureAnalyticsBenchmark/blob/1397e7d9b34e3150c9150b85c8ae7ee492b69c12/Labs/Module%202/tpcdsDataGeneration.sh#L78) の scaleFactor（GB単位）で設定
 -->
 
-生成するデータ量（GB単位）をパラメータで指定し tpcdsDataGeneration.sh を実行します。
+テストデータのスケール（GB単位）をパラメータで指定し tpcdsDataGeneration.sh を実行します。
 
 ```bash
 cd "AzureAnalyticsBenchmark/Labs/Module 2"
@@ -69,7 +77,7 @@ bash tpcdsDataGeneration.sh 10
 ## 2-3. スキーマ定義とデータロード
 
 ### Synapse Serverless SQL
-[serverlessSQL.sh:L26](https://github.com/gho9o9/Azure-Synapse-TPC-DS-Benchmark-Testing/blob/bd6e976f41b245df7bee32a6acce2509488c5bcd/Labs/Module%202/serverlessSQL.sh#L26) の datalakeContainer 変数で示されるデータソースへのパスを環境に応じて適宜修正したのちスクリプトを実行します。該当スクリプトは冪等で実装されているため、テストデータを格納するストレージロケーションやデータサイズの変更時などで繰り返し実行可能です。  
+[serverlessSQL.sh:L26](https://github.com/gho9o9/AzureAnalyticsBenchmark/blob/1397e7d9b34e3150c9150b85c8ae7ee492b69c12/Labs/Module%202/serverlessSQL.sh#L26) の datalakeContainer 変数で示されるデータソースへのパスを環境に応じて適宜修正したのちスクリプトを実行します。該当スクリプトは冪等で実装されているため、テストデータを格納するストレージロケーションやデータサイズの変更時などで繰り返し実行可能です。  
 
 ```bash
 cd "AzureAnalyticsBenchmark/Labs/Module 3"
@@ -84,7 +92,7 @@ bash serverlessSQL.sh
 ![](images/o9o9_2023-08-02-23-38-58.png)  
 
 ### Synapse Dedicated SQL 
-Synapse Pipeline「LoadTPCDS」のアクティビティ「Lookup - Create External Tables」の設定->クエリ について、クエリ内で示されるデータソースへのパスを環境に応じて適宜修正したのち [sqlPoolDataLoading.sh](https://github.com/gho9o9/Azure-Synapse-TPC-DS-Benchmark-Testing/blob/main/Labs/Module%202/sqlPoolDataLoading.sh) を実行します。該当スクリプトは冪等で実装されているため、テストデータを格納するストレージロケーションやデータサイズの変更時などで繰り返し実行可能です。  
+Synapse Pipeline「LoadTPCDS」のアクティビティ「Lookup - Create External Tables」の設定->クエリ について、クエリ内で示されるデータソースへのパスを環境に応じて適宜修正したのち [sqlPoolDataLoading.sh](https://github.com/gho9o9/AzureAnalyticsBenchmark/blob/main/Labs/Module%202/sqlPoolDataLoading.sh) を実行します。該当スクリプトは冪等で実装されているため、テストデータを格納するストレージロケーションやデータサイズの変更時などで繰り返し実行可能です。  
 ![](images/o9o9_2023-08-02-23-41-48.png)  
 
 ```bash
@@ -93,7 +101,8 @@ bash sqlPoolDataLoading.sh
 ![](images/o9o9_2023-08-02-23-54-18.png)  
 
 スクリプトはスキーマ定義＆データロード用のパイプラインをキックしています。このパイプラインの完了を待ち合わせます。
-★★★★★★★★
+![](images/o9o9_2023-08-03-01-41-48.png)  
+![](images/o9o9_2023-08-03-01-47-15.png)  
 
 なお、上記のスクリプト実行により各テーブルの分散ポリシーは以下の通りに定義されています。
 ```SQL
