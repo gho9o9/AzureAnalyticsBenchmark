@@ -32,7 +32,7 @@ for file in $WH_SQL_DIR/*.sql; do
   filename=$(basename "$file")
   for ((i=1; i<=$SAMPLING; i++)); do
     echo -n `date "+%Y/%m/%d %T %Z"`,"Synapse Serverless - $filename,$i," >> $LOG_PATH
-    (time sqlcmd -S tcpds-pocsynapseanalytics-tpcds-ondemand.sql.azuresynapse.net -d TPCDSDBExternal -G -U $USR -P $PASS -I -i $file ) 2>> $LOG_PATH 1>/dev/null
+    (time sqlcmd -S <synapse_workspace_name>-ondemand.sql.azuresynapse.net -d TPCDSDBExternal -G -U $USER -P $PASS -I -i $file ) 2>> $LOG_PATH 1>/dev/null
   done
 done
 
@@ -41,7 +41,7 @@ for file in $WH_SQL_DIR/*.sql; do
   filename=$(basename "$file")
   for ((i=1; i<=$SAMPLING; i++)); do
     echo -n `date "+%Y/%m/%d %T %Z"`,"Synapse DataWarehouse - $filename,$i," >> $LOG_PATH
-    (time sqlcmd -S tcpds-pocsynapseanalytics-tpcds.sql.azuresynapse.net -d DataWarehouse -G -U $USR -P $PASS -I -i $file ) 2>> $LOG_PATH 1>/dev/null
+    (time sqlcmd -S <synapse_workspace_name>.sql.azuresynapse.net -d DataWarehouse -G -U $USER -P $PASS -I -i $file ) 2>> $LOG_PATH 1>/dev/null
   done
 done
 
@@ -50,7 +50,7 @@ for file in $WH_SQL_DIR/*.sql; do
   filename=$(basename "$file")
   for ((i=1; i<=$SAMPLING; i++)); do
     echo -n `date "+%Y/%m/%d %T %Z"`,"Fabric Warehouse - $filename,$i," >> $LOG_PATH
-    (time sqlcmd -S 3mgi7ixzb7ke5dlbvcbi56iwby-kci3w4gnlgeupl4bwwbvobf3zi.datawarehouse.pbidedicated.windows.net -d tpcds_warehouse -G -U $USR -P $PASS -I -i $file ) 2>> $LOG_PATH 1>/dev/null
+    (time sqlcmd -S <fabric_workspace_id>.datawarehouse.pbidedicated.windows.net -d <fabric_warehouse_name> -G -U $USER -P $PASS -I -i $file ) 2>> $LOG_PATH 1>/dev/null
   done
 done
 
@@ -59,7 +59,7 @@ for file in $LH_SQL_DIR/*.sql; do
   filename=$(basename "$file")
   for ((i=1; i<=$SAMPLING; i++)); do
     echo -n `date "+%Y/%m/%d %T %Z"`,"Fabric Lakehouse - $filename,$i," >> $LOG_PATH
-    (time sqlcmd -S 3mgi7ixzb7ke5dlbvcbi56iwby-kci3w4gnlgeupl4bwwbvobf3zi.datawarehouse.pbidedicated.windows.net -d tpcds_lakehouse -G -U $USR -P $PASS -I -i $file ) 2>> $LOG_PATH 1>/dev/null
+    (time sqlcmd -S <fabric_workspace_id>.datawarehouse.pbidedicated.windows.net -d <fabric_lakehouse_name> -G -U $USER -P $PASS -I -i $file ) 2>> $LOG_PATH 1>/dev/null
   done
 done
 

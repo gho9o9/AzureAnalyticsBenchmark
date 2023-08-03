@@ -295,6 +295,8 @@ FROM 'https://<storage account>.blob.core.windows.net/<container>/raw/tpc-ds/sou
 WITH (CREDENTIAL=(IDENTITY= 'Storage Account Key', SECRET='<secret>'), FILE_TYPE = 'PARQUET');
 ```
 
+![](images/o9o9_2023-08-03-13-30-30.png)
+
 ### Fabric Lakehouse
 データロード内のストレージアカウント名とデータソースへのパスを環境に応じて適宜修正したのち、ノートブックに貼り付け順次実行します。該当スクリプトは冪等で実装されているため、テストデータを格納するストレージロケーションやデータサイズの変更時などで繰り返し実行可能です。  
 
@@ -368,6 +370,8 @@ full_tables = [
 for table in full_tables:
     loadFullDataFromSource(table)
 ```
+
+![](images/o9o9_2023-08-03-13-41-49.png)
 
 ### Databricks SQL
 データロードスクリプト内のストレージアカウント名とデータソースへのパスを環境に応じて適宜修正したのち SQL スクリプトを順次実行します。  
@@ -536,6 +540,8 @@ FROM 'abfss://<container>@<account>.dfs.core.windows.net/raw/tpc-ds/source_files
 FILEFORMAT = PARQUET;
 ```
 
+![](images/o9o9_2023-08-03-13-40-19.png)
+
 > ※ データソースのファイルが空ファイルの場合はデータロードが以下のエラーで失敗します。
 > *Exception thrown in awaitResult: [CANNOT_READ_FILE_FOOTER] Could not read footer for file: fcfs-abfss://data@tcpdstpcdsacctpoc.dfs.core.windows.net/raw/tpc-ds/source_files_010GB_parquet/income_band/part-00000-tid-6248170554742552544-e591de2f-0760-4038-a681-7a18ec27d774-572-1-c000.snappy.parquet.*
 > その場合は空ファイルを削除した後、スクリプトを再実行します（データ生成に利用しているライブラリの不都合で空ファイルが作成される場合がある模様）。 
@@ -556,9 +562,15 @@ Databricks SQL CLI については[このページ](https://qiita.com/taka_yayoi
 - データベースの暖機はしない（データロード直後の状態に対してベンチマークを実行）。
 
 ## ベンチマーク実行
-以下のスクリプトを実行すると「./log/benchmark.csv」に実行ログが出力されます。
+ベンチマークの対象とする各ターゲットのエンドポイント
 ```bash
 cd "AzureAnalyticsBenchmark/Benchmark"
+code benchmark.sh
+```
+![](images/o9o9_2023-08-03-14-43-53.png)  
+
+以下のスクリプトを実行すると「./log/benchmark.csv」に実行ログが逐次出力されます。
+```bash
 bash benchmark.sh <aaduser> <password>
 ```
 
