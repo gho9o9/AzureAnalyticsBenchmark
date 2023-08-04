@@ -30,8 +30,8 @@ echo "Generating the TPCDS Demo Data database using Synapse Serverless SQL ..."
 ################################################################################################
 #   Generate a SAS for the data lake 
 ################################################################################################
-tomorrowsDate=$(date --date="tomorrow" +%Y-%m-%d)
-destinationStorageSAS=$(az storage container generate-sas --account-name ${datalakeName} --name data --permissions rwal --expiry ${tomorrowsDate} --only-show-errors --output tsv)
+nextyearDate=$(date --date="next year" +%Y-%m-%d)
+destinationStorageSAS=$(az storage container generate-sas --account-name ${datalakeName} --name data --permissions rwal --expiry ${nextyearDate} --only-show-errors --output tsv)
 echo $destinationStorageSAS
 
 newSAS="${destinationStorageSAS//&/"\&"}"

@@ -27,21 +27,31 @@ echo -e $HEADER > $LOG_PATH
 <<COMMENT_OUT
 COMMENT_OUT
 
-# Synapse Serverless
-for file in $WH_SQL_DIR/*.sql; do
-  filename=$(basename "$file")
-  for ((i=1; i<=$SAMPLING; i++)); do
-    echo -n `date "+%Y/%m/%d %T %Z"`,"Synapse Serverless - $filename,$i," >> $LOG_PATH
-    (time sqlcmd -S <synapse_workspace_name>-ondemand.sql.azuresynapse.net -d TPCDSDBExternal -G -U $USER -P $PASS -I -i $file ) 2>> $LOG_PATH 1>/dev/null
-  done
-done
-
 # Synapse DataWarehouse
 for file in $WH_SQL_DIR/*.sql; do
   filename=$(basename "$file")
   for ((i=1; i<=$SAMPLING; i++)); do
     echo -n `date "+%Y/%m/%d %T %Z"`,"Synapse DataWarehouse - $filename,$i," >> $LOG_PATH
     (time sqlcmd -S <synapse_workspace_name>.sql.azuresynapse.net -d DataWarehouse -G -U $USER -P $PASS -I -i $file ) 2>> $LOG_PATH 1>/dev/null
+  done
+done
+
+# Databricks SQL
+for file in $DB_SQL_DIR/*.sql; do
+  filename=$(basename "$file")
+  for ((i=1; i<=$SAMPLING; i++)); do
+    echo -n `date "+%Y/%m/%d %T %Z"`,"Databricks SQL - $filename,$i," >> $LOG_PATH
+    (time dbsqlcli -e $file) 2>> $LOG_PATH 1>/dev/null
+    # (time dbsqlcli -e $file --hostname <host> --http-path <path> --access-token <token>) 2>> $LOG_PATH 1>/dev/null
+  done
+done
+
+# Synapse Serverless
+for file in $WH_SQL_DIR/*.sql; do
+  filename=$(basename "$file")
+  for ((i=1; i<=$SAMPLING; i++)); do
+    echo -n `date "+%Y/%m/%d %T %Z"`,"Synapse Serverless - $filename,$i," >> $LOG_PATH
+    (time sqlcmd -S <synapse_workspace_name>-ondemand.sql.azuresynapse.net -d TPCDSDBExternal -G -U $USER -P $PASS -I -i $file ) 2>> $LOG_PATH 1>/dev/null
   done
 done
 
@@ -60,15 +70,5 @@ for file in $LH_SQL_DIR/*.sql; do
   for ((i=1; i<=$SAMPLING; i++)); do
     echo -n `date "+%Y/%m/%d %T %Z"`,"Fabric Lakehouse - $filename,$i," >> $LOG_PATH
     (time sqlcmd -S <fabric_workspace_id>.datawarehouse.pbidedicated.windows.net -d <fabric_lakehouse_name> -G -U $USER -P $PASS -I -i $file ) 2>> $LOG_PATH 1>/dev/null
-  done
-done
-
-# Databricks SQL
-for file in $DB_SQL_DIR/*.sql; do
-  filename=$(basename "$file")
-  for ((i=1; i<=$SAMPLING; i++)); do
-    echo -n `date "+%Y/%m/%d %T %Z"`,"Databricks SQL - $filename,$i," >> $LOG_PATH
-    (time dbsqlcli -e $file) 2>> $LOG_PATH 1>/dev/null
-    # (time dbsqlcli -e $file --hostname <host> --http-path <path> --access-token <token>) 2>> $LOG_PATH 1>/dev/null
   done
 done
