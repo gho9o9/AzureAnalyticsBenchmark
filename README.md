@@ -562,7 +562,7 @@ Databricks SQL CLI については[このページ](https://qiita.com/taka_yayoi
 - データベースの暖機はしない（データロード直後の状態に対してベンチマークを実行）。
 
 ## ベンチマーク実行
-ベンチマークの対象とする各ターゲットのエンドポイント
+ベンチマークの対象とする各ターゲットのエンドポイントを環境に合わせて修正します。
 ```bash
 cd "AzureAnalyticsBenchmark/Benchmark"
 code benchmark.sh
@@ -597,3 +597,4 @@ bash benchmark.sh <aaduser> <password>
 - [Automated TPC-DS Benchmark Testing with Azure Synapse Analytics](https://www.linkedin.com/pulse/automated-tpc-ds-benchmark-testing-azure-synapse-analytics-wang/)
 - [Azure-Synapse-TPC-DS-Benchmark-Testing](https://github.com/swanguni/Azure-Synapse-TPC-DS-Benchmark-Testing)
 - [Azure Synapse Serverless vs Databricks SQL Analytics (as of August 2021)](https://www.dataplatformschool.com/blog/synapse-databricks-benchmark/)
+- [データベースの性能検証に利用されるTPC-HとTPC-DSに関するざっくりとした整理](https://qiita.com/manabian/items/93d9330cdb607383c2b9)
