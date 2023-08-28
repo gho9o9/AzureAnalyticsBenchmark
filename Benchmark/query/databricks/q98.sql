@@ -11,7 +11,7 @@ FROM TPCDS.store_sales,
      TPCDS.item,
      TPCDS.date_dim
 WHERE ss_item_sk = i_item_sk
-  AND i_category IN ('Sports',
+  AND trim(i_category) IN ('Sports',
                      'Books',
                      'Home')
   AND ss_sold_date_sk = d_date_sk

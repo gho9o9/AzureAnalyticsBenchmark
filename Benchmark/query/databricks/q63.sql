@@ -25,19 +25,19 @@ FROM
                          1200+9,
                          1200+10,
                          1200+11)
-     AND ((i_category IN ('Books',
+     AND ((trim(i_category) IN ('Books',
                           'Children',
                           'Electronics')
-           AND i_class IN ('personal',
+           AND trim(i_class) IN ('personal',
                            'portable',
                            'reference',
                            'self-help')
-           AND i_brand IN ('scholaramalgamalg #14',
+           AND trim(i_brand) IN ('scholaramalgamalg #14',
                            'scholaramalgamalg #7',
                            'exportiunivamalg #9',
-                           'scholaramalgamalg #9')) or(i_category IN ('Women', 'Music', 'Men')
-                                                       AND i_class IN ('accessories', 'classical', 'fragrances', 'pants')
-                                                       AND i_brand IN ('amalgimporto #1', 'edu packscholar #1', 'exportiimporto #1', 'importoamalg #1')))
+                           'scholaramalgamalg #9')) or(trim(i_category) IN ('Women', 'Music', 'Men')
+                                                       AND trim(i_class) IN ('accessories', 'classical', 'fragrances', 'pants')
+                                                       AND trim(i_brand) IN ('amalgimporto #1', 'edu packscholar #1', 'exportiimporto #1', 'importoamalg #1')))
    GROUP BY i_manager_id,
             d_moy) tmp1
 WHERE CASE

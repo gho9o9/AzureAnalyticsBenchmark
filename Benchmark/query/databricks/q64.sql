@@ -67,7 +67,7 @@ USE CATALOG o9o9uccatalog;
      AND hd1.hd_income_band_sk = ib1.ib_income_band_sk
      AND hd2.hd_income_band_sk = ib2.ib_income_band_sk
      AND cd1.cd_marital_status <> cd2.cd_marital_status
-     AND i_color IN ('purple',
+     AND trim(i_color) IN ('purple',
                      'burlywood',
                      'indian',
                      'spring',

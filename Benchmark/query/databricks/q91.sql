@@ -21,8 +21,8 @@ WHERE cr_call_center_sk = cc_call_center_sk
   AND d_year = 1998
   AND d_moy = 11
   AND ((cd_marital_status = 'M'
-        AND cd_education_status = 'Unknown') or(cd_marital_status = 'W'
-                                                AND cd_education_status = 'Advanced Degree'))
+        AND trim(cd_education_status) = 'Unknown') or(cd_marital_status = 'W'
+                                                AND trim(cd_education_status) = 'Advanced Degree'))
   AND hd_buy_potential like 'Unknown%'
   AND ca_gmt_offset = -7
 GROUP BY cc_call_center_id,

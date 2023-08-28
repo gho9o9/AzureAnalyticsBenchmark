@@ -28,7 +28,7 @@ LEFT OUTER JOIN TPCDS.catalog_returns ON (cr_item_sk = cs_item_sk
 WHERE d1.d_week_seq = d2.d_week_seq
   AND inv_quantity_on_hand < cs_quantity
   AND d3.d_date > (DATEADD(DAY, 5, cast(d1.d_date AS DATE)))
-  AND hd_buy_potential = '>10000'
+  AND trim(hd_buy_potential) = '>10000'
   AND d1.d_year = 1999
   AND cd_marital_status = 'D'
 GROUP BY i_item_desc,
