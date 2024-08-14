@@ -14,7 +14,16 @@
 
 # 2. Setup
 
-## 2-1. リソースデプロイ
+## 2-1. ベンチマークツールのクローン
+
+ベンチマークツールをクローンします。
+
+```bash
+az account set --subscription "YourSubscriptionName"
+git clone https://github.com/gho9o9/AzureAnalyticsBenchmark.git
+```
+
+## 2-2. リソースデプロイ
 
 ベンチマーク対象とする各リソースをデプロイします。
 
@@ -22,8 +31,6 @@
 以下のコマンドを実行します。ここではデータ生成用の Storage と Databricks（Standard SKU） もデプロイしています。
 
 ```bash
-az account set --subscription "YourSubscriptionName"
-git clone https://github.com/gho9o9/AzureAnalyticsBenchmark.git
 cd "AzureAnalyticsBenchmark/Labs/Module 1"
 bash provisionServices.sh <serviceNamePrefix>
 ```
@@ -53,7 +60,7 @@ Fabric GUI からそれぞれのリソースをデプロイします。
 Azure Portal から Databricks（Premium SKU）をデプロイします。Databricks SQL には Premium SKU が必要です。
 ![](images/o9o9_2023-07-31-15-10-39.png)
   
-## 2-2. データ生成
+## 2-3. データ生成
 
 <!-- 
 ### スケール設定
@@ -74,7 +81,7 @@ bash tpcdsDataGeneration.sh 10
 参考：スケールに応じたデータ件数とサイズ
 ![](https://media.licdn.com/dms/image/D5612AQEBRda1pnSpnA/article-inline_image-shrink_1500_2232/0/1654805954089?e=1695859200&v=beta&t=uZ9wUBfXodX3Ly0eaTAeTLJJV-4-UwXiiksyjSbrFI8)
 
-## 2-3. スキーマ定義とデータロード
+## 2-4. スキーマ定義とデータロード
 
 ### Synapse Serverless SQL
 [serverlessSQL.sh:L26](https://github.com/gho9o9/AzureAnalyticsBenchmark/blob/1397e7d9b34e3150c9150b85c8ae7ee492b69c12/Labs/Module%202/serverlessSQL.sh#L26) の datalakeContainer 変数で示されるデータソースへのパスを環境に応じて適宜修正したのちスクリプトを実行します。該当スクリプトは冪等で実装されているため、テストデータを格納するストレージロケーションやデータサイズの変更時などで繰り返し実行可能です。  
