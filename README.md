@@ -14,7 +14,7 @@
 
 # 2. Setup
 
-## 2-1. ベンチマークツールのクローン
+## 2-1. ベンチマークツールのクローンと準備
 
 ベンチマークツールをクローンします。
 
@@ -23,12 +23,7 @@ az account set --subscription "YourSubscriptionName"
 git clone https://github.com/gho9o9/AzureAnalyticsBenchmark.git
 ```
 
-## 2-2. リソースデプロイ
-
-ベンチマーク対象とする各リソースをデプロイします。
-
-### Synapse Serverless SQL と Synapse Dedicated SQL  
-以下のコマンドを実行します。ここではデータ生成用の Storage と Databricks（Standard SKU） もデプロイしています。
+次に以下のコマンドを実行します。ここではデータ生成に利用する Storage と Databricks（Standard SKU）のデプロイとベンチマーク対象となる Synapse Serverless SQL と Synapse Dedicated SQL をデプロイしています。
 
 ```bash
 cd "AzureAnalyticsBenchmark/Labs/Module 1"
@@ -51,6 +46,13 @@ bash configEnvironment.sh
 ```
 ![](images/o9o9_2023-08-02-22-50-18.png)  
 ![](images/o9o9_2023-08-03-02-04-13.png)  
+
+## 2-2. ベンチマーク対象のデプロイ
+
+ベンチマーク対象とする各リソースをデプロイします。
+
+### Synapse Serverless SQL と Synapse Dedicated SQL  
+手順 2-1 のスクリプト実行によりデプロイ済みであるためここでの操作は不要です。
 
 ### Fabric Warehouse と Fabric Lakehouse
 Fabric GUI からそれぞれのリソースをデプロイします。
@@ -76,10 +78,14 @@ bash tpcdsDataGeneration.sh 10
 ```
 
 ![](images/o9o9_2023-08-02-23-29-52.png)  
-![](images/o9o9_2023-08-02-23-31-51.png)  
 
 参考：スケールに応じたデータ件数とサイズ
+![](images/o9o9_2024-08-14-09-34-00.png)
+
+<!--
+![](images/o9o9_2023-08-02-23-31-51.png)  
 ![](https://media.licdn.com/dms/image/D5612AQEBRda1pnSpnA/article-inline_image-shrink_1500_2232/0/1654805954089?e=1695859200&v=beta&t=uZ9wUBfXodX3Ly0eaTAeTLJJV-4-UwXiiksyjSbrFI8)
+-->
 
 ## 2-4. スキーマ定義とデータロード
 
