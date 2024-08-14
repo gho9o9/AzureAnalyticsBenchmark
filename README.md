@@ -313,6 +313,7 @@ FROM 'https://<storage account>.blob.core.windows.net/<container>/raw/tpc-ds/sou
 WITH (CREDENTIAL=(IDENTITY= 'Storage Account Key', SECRET='<secret>'), FILE_TYPE = 'PARQUET');
 ```
 
+![](images/o9o9_2024-08-15-01-01-57.png)  
 ![](images/o9o9_2023-08-03-13-30-30.png)
 
 ### Fabric Lakehouse
@@ -389,7 +390,7 @@ for table in full_tables:
     loadFullDataFromSource(table)
 ```
 
-![](images/o9o9_2023-08-03-13-41-49.png)
+![](images/o9o9_2024-08-15-01-18-04.png)  
 
 ### Databricks SQL
 データロードスクリプト内のストレージアカウント名とデータソースへのパスを環境に応じて適宜修正したのち SQL スクリプトを順次実行します。  
