@@ -19,6 +19,7 @@
 ベンチマークツールをクローンします。
 
 ```bash
+az login
 az account set --subscription "YourSubscriptionName"
 git clone https://github.com/gho9o9/AzureAnalyticsBenchmark.git
 ```
@@ -29,7 +30,10 @@ git clone https://github.com/gho9o9/AzureAnalyticsBenchmark.git
 cd "AzureAnalyticsBenchmark/Labs/Module 1"
 bash provisionServices.sh <serviceNamePrefix>
 ```
-![](images/o9o9_2023-08-03-02-00-42.png)
+<!-- ![](images/o9o9_2023-08-03-02-00-42.png)  -->
+
+上記のスクリプトの実行により以下の Azure リソースがデプロイされます。  
+![](images/o9o9_2024-08-14-10-01-51.png)
 
 次に [configEnvironment.sh:L120](https://github.com/gho9o9/AzureAnalyticsBenchmark/blob/1397e7d9b34e3150c9150b85c8ae7ee492b69c12/Labs/Module%201/configEnvironment.sh#L120) の datalakeContainer 変数で示されるデータソースへのパスをテストデータのスケールに応じて適宜修正します。
 > 例：スケールを 100（100 GB） とした場合
@@ -45,7 +49,7 @@ code configEnvironment.sh
 bash configEnvironment.sh
 ```
 ![](images/o9o9_2023-08-02-22-50-18.png)  
-![](images/o9o9_2023-08-03-02-04-13.png)  
+<!-- ![](images/o9o9_2023-08-03-02-04-13.png)  -->
 
 ## 2-2. ベンチマーク対象のデプロイ
 
@@ -73,17 +77,18 @@ Azure Portal から Databricks（Premium SKU）をデプロイします。Databr
 
 ```bash
 cd "AzureAnalyticsBenchmark/Labs/Module 2"
-# データ量 10 GB を指定
-bash tpcdsDataGeneration.sh 10
+# データ量 100 GB を指定
+bash tpcdsDataGeneration.sh 100
 ```
 
+上記のスクリプトの実行により Databricks を使用したデータ生成が行われます。
 ![](images/o9o9_2023-08-02-23-29-52.png)  
+![](images/o9o9_2023-08-02-23-31-51.png)  
 
-参考：スケールに応じたデータ件数とサイズ
-![](images/o9o9_2024-08-14-09-34-00.png)
+参考：スケールに応じたデータ件数とサイズ  
+![](images/o9o9_2024-08-14-09-34-00.png)  
 
 <!--
-![](images/o9o9_2023-08-02-23-31-51.png)  
 ![](https://media.licdn.com/dms/image/D5612AQEBRda1pnSpnA/article-inline_image-shrink_1500_2232/0/1654805954089?e=1695859200&v=beta&t=uZ9wUBfXodX3Ly0eaTAeTLJJV-4-UwXiiksyjSbrFI8)
 -->
 

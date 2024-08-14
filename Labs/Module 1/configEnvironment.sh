@@ -182,6 +182,9 @@ if [[ $(az keyvault list --resource-group $RESOURCE_GROUP | jq .[].name | grep -
     az keyvault create --name $KEY_VAULT --resource-group $RESOURCE_GROUP --location $LOCATION
 fi
 
+USER_OBJECT_ID=$(az ad signed-in-user show --query id --output tsv)
+az role assignment create --role "Key Vault Administrator" --assignee $USER_OBJECT_ID --scope /subscriptions/$ARM_SUBSCRIPTION_ID/resourceGroups/$RESOURCE_GROUP/providers/Microsoft.KeyVault/vaults/$KEY_VAULT
+
 az keyvault secret set  --name $ARM_SPN_CREDENTIAL --value $ARM_CLIENT_SECRET --vault-name $KEY_VAULT
 az keyvault secret set --name $ARM_SPN_OBJECT --value $ARM_OBJECT_ID --vault-name $KEY_VAULT
 az keyvault secret set --name $ARM_SPN_CLIENT --value $ARM_CLIENT_ID --vault-name $KEY_VAULT

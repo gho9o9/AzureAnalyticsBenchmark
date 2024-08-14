@@ -25,12 +25,21 @@ ARM_SPN_TENANT="tpcds-spn-tenant"
 ######################################################################################
 STORAGE_ACCT=$(terraform output -state=Terraform/terraform.tfstate -raw datalake_name 2>&1)
 echo "Using Azure Storage Account: ${STORAGE_ACCT}"
+SAS=$(az storage container generate-sas --account-name $STORAGE_ACCT --name script --permissions rwl --expiry $(date -u -d "1 day" '+%Y-%m-%dT%H:%MZ') --output tsv)
 #STORAGE_ACCT="tpcdsacctpoc"
 FILE_SYSTEM_NAME="data"
 
 ######################################################################################
 # Databricks Configuration
 ######################################################################################
+
+initScriptsPath="dbfs:/databricks/scripts"
+libraryPath="dbfs:/databricks/jars"
+pathOnDatabricks="/tpcds"
+notebookName="/tpcds/TPC-DS-Data-Generation.scala"
+initScriptName="tpcds-install.sh"
+libraryJar="spark-sql-perf_2.12-0.5.1-SNAPSHOT.jar"
+
 MANAGEMENT_RESOURCE_ENDPOINT="https://management.core.windows.net/" 
 #RESOURCE_GROUP="PoC-Synapse-Analytics"
 RESOURCE_GROUP=$(terraform output -state=Terraform/terraform.tfstate -raw synapse_analytics_workspace_resource_group 2>&1)
@@ -42,22 +51,17 @@ DATABRICKS_WORKSPACE=$(terraform output -state=Terraform/terraform.tfstate -raw 
 echo "Using Databricks workspace: ${DATABRICKS_WORKSPACE}"
 #DATABRICKS_WORKSPACE="pocdatabricks-tpcds"
 DATABRICKS_CLUSTER_NAME="tpc-ds-cluster"
-DATABRICKS_SPARK_VERSION="9.1.x-scala2.12"
+DATABRICKS_SPARK_VERSION="15.3.x-scala2.12"
 DATABRICKS_NODE_TYPE="Standard_D3_v2"
 DATABRICKS_NUM_WORKERS=4 
 DATABRICKS_SPARK_CONF='{"spark.speculation":"true","spark.databricks.delta.preview.enabled":"true"}'
 DATABRICKS_AUTO_TERMINATE_MINUTES=60
-DATABRICKS_INIT_SCRIPT='[ { "dbfs": { "destination": "dbfs:/databricks/scripts/tpcds-install.sh" } } ]'
+# DATABRICKS_INIT_SCRIPT='[ { "dbfs": { "destination": "dbfs:/databricks/scripts/tpcds-install.sh" } } ]'
+DATABRICKS_INIT_SCRIPT="[ { \"abfss\": { \"destination\": \"abfss://script@$STORAGE_ACCT.blob.core.windows.net/$initScriptName?$SAS\" } } ]"
 DATABRICKS_CLUSTER_LOG='{ "dbfs": { "destination": "dbfs:/cluster-logs" } } '
 DATABRICKS_SPARK_LIBRARY='[ { "jar": "dbfs:/databricks/jars/spark-sql-perf_2.12-0.5.1-SNAPSHOT.jar" } ]'
 DATABRICKS_CLUSTER_ID="tpcds-db-cluster-id"
 
-initScriptsPath="dbfs:/databricks/scripts"
-libraryPath="dbfs:/databricks/jars"
-pathOnDatabricks="/tpcds"
-notebookName="/tpcds/TPC-DS-Data-Generation.scala"
-initScriptName="tpcds-install.sh"
-libraryJar="spark-sql-perf_2.12-0.5.1-SNAPSHOT.jar"
 
 ######################################################################################
 # Get Service Principal Info
@@ -194,32 +198,34 @@ find . -type f -name "$initScriptName" -print0 | while IFS= read -r -d '' file; 
     filename=${file//$replaceSource/$replaceDest}
     echo "New filename: $filename"
 
-    echo "curl -F path=$initScriptsPath/$filename -F content=@$filename https://$workspaceUrl/api/2.0/dbfs/put"
+#    echo "curl -F path=$initScriptsPath/$filename -F content=@$filename https://$workspaceUrl/api/2.0/dbfs/put"
+#
+#    curl -n https://$workspaceUrl/api/2.0/dbfs/put \
+#        -H "Authorization:Bearer $token" \
+#        -H "X-Databricks-Azure-SP-Management-Token: $mgmt_access_token" \
+#        -H "X-Databricks-Azure-Workspace-Resource-Id: $workspaceId" \
+#        -F overwrite=true \
+#        -F path="$initScriptsPath/$filename" \
+#        -F content=@"$filename"       
+#
+#    echo ""
 
-    curl -n https://$workspaceUrl/api/2.0/dbfs/put \
-        -H "Authorization:Bearer $token" \
-        -H "X-Databricks-Azure-SP-Management-Token: $mgmt_access_token" \
-        -H "X-Databricks-Azure-Workspace-Resource-Id: $workspaceId" \
-        -F overwrite=true \
-        -F path="$initScriptsPath/$filename" \
-        -F content=@"$filename"       
-
-    echo ""
+    azcopy copy "$initScriptName" "https://${STORAGE_ACCT}.blob.core.windows.net/script/${initScriptName}?${SAS}"
 
 done
 
 ######################################################################################
 # List Init Scripts 
 ######################################################################################
-echo "curl https://$workspaceUrl/api/2.0/dbfs/list -d $initScriptJson"
-
-curl -X GET https://$workspaceUrl/api/2.0/dbfs/list \
-        -H "Authorization:Bearer $token" \
-        -H "X-Databricks-Azure-SP-Management-Token: $mgmt_access_token" \
-        -H "X-Databricks-Azure-Workspace-Resource-Id: $workspaceId" \
-        -H "Content-Type: application/json" \
-        --data "$initScriptJson"
-
+# echo "curl https://$workspaceUrl/api/2.0/dbfs/list -d $initScriptJson"
+# 
+# curl -X GET https://$workspaceUrl/api/2.0/dbfs/list \
+#         -H "Authorization:Bearer $token" \
+#         -H "X-Databricks-Azure-SP-Management-Token: $mgmt_access_token" \
+#         -H "X-Databricks-Azure-Workspace-Resource-Id: $workspaceId" \
+#         -H "Content-Type: application/json" \
+#         --data "$initScriptJson"
+#
 echo ""
 echo "Complete uploading init script ......"
 
@@ -316,7 +322,7 @@ cluster_id_response=$(curl -X POST \
     -H "X-Databricks-Azure-SP-Management-Token: $mgmt_access_token" \
     -H "X-Databricks-Azure-Workspace-Resource-Id: $workspaceId" \
     -d $clusterConfigJson \
-    https://$workspaceUrl/api/2.0/clusters/create)
+    https://$workspaceUrl/api/2.1/clusters/create)
 
 clusterId=$(jq .cluster_id -r <<< "$cluster_id_response")
 echo "Cluster id: $clusterId"

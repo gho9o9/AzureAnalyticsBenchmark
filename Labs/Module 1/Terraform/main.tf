@@ -222,7 +222,7 @@ resource "azurerm_databricks_workspace" "Databricks" {
   name                = var.databricks_workspace_name
   resource_group_name = var.resource_group_name
   location            = var.azure_region
-  sku                 = "standard"
+  sku                 = "premium"
   
   depends_on = [ azurerm_resource_group.resource_group ]
 }
@@ -282,6 +282,15 @@ resource "azurerm_storage_data_lake_gen2_filesystem" "datalake-data" {
   depends_on = [ azurerm_storage_account.datalake, azurerm_role_assignment.adls-user-permissions ]
 }
 
+// Storage Container for init script
+//   Azure: https://docs.microsoft.com/en-us/azure/storage/blobs/storage-blobs-introduction
+//   Terraform: https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/storage_data_lake_gen2_filesystem
+resource "azurerm_storage_data_lake_gen2_filesystem" "datalake-script" {
+  name               = "script"
+  storage_account_id = azurerm_storage_account.datalake.id
+  
+  depends_on = [ azurerm_storage_account.datalake, azurerm_role_assignment.adls-user-permissions ]
+}
 
 // Create a Private Endpoint for Blob
 //   Azure: https://docs.microsoft.com/en-us/azure/storage/common/storage-private-endpoints
