@@ -7,7 +7,7 @@
 
 ************************************************************************************************************************************************/
 
-azure_region                             = "eastus"                               // Region to create all the resources in.
+azure_region                             = "westus3"                               // Region to create all the resources in.
 resource_group_name                      = "DEPLOY_PREFIX_NAME-PoC-Synapse-Analytics"                // Resource Group for all related Azure services.
 synapse_sql_pool_name                    = "DataWarehouse"                        // Name of the SQL pool to create.
 synapse_sql_administrator_login          = "sqladminuser"                         // Native SQL account for administration.
