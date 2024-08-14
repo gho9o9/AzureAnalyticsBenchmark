@@ -25,9 +25,21 @@ ARM_SPN_TENANT="tpcds-spn-tenant"
 ######################################################################################
 STORAGE_ACCT=$(terraform output -state=Terraform/terraform.tfstate -raw datalake_name 2>&1)
 echo "Using Azure Storage Account: ${STORAGE_ACCT}"
-SAS=$(az storage container generate-sas --account-name $STORAGE_ACCT --name script --permissions rwl --expiry $(date -u -d "1 day" '+%Y-%m-%dT%H:%MZ') --output tsv)
+SAS_SCRIPT=$(az storage container generate-sas --account-name $STORAGE_ACCT --name script --permissions rwl --expiry $(date -u -d "1 day" '+%Y-%m-%dT%H:%MZ') --output tsv)
+SAS_JAR=$(az storage container generate-sas --account-name $STORAGE_ACCT --name jar --permissions rwl --expiry $(date -u -d "1 day" '+%Y-%m-%dT%H:%MZ') --output tsv)
 #STORAGE_ACCT="tpcdsacctpoc"
 FILE_SYSTEM_NAME="data"
+
+######################################################################################
+# Get Service Principal Info
+######################################################################################
+echo "Retrieving Service Principal Info ......"
+APP_SPN_NAME=$(terraform output -state=Terraform/terraform.tfstate -raw sp_name 2>&1)
+
+ARM_OBJECT_ID=$(az keyvault secret show --name $ARM_SPN_OBJECT --vault-name $KEY_VAULT --query value -o tsv)
+ARM_CLIENT_ID=$(az keyvault secret show --name $ARM_SPN_CLIENT --vault-name $KEY_VAULT --query value -o tsv)
+ARM_TENANT_ID=$(az keyvault secret show --name $ARM_SPN_TENANT --vault-name $KEY_VAULT --query value -o tsv)
+ARM_CLIENT_SECRET=$(az keyvault secret show --name $ARM_SPN_CREDENTIAL --vault-name $KEY_VAULT --query value -o tsv)
 
 ######################################################################################
 # Databricks Configuration
@@ -54,25 +66,14 @@ DATABRICKS_CLUSTER_NAME="tpc-ds-cluster"
 DATABRICKS_SPARK_VERSION="15.3.x-scala2.12"
 DATABRICKS_NODE_TYPE="Standard_D3_v2"
 DATABRICKS_NUM_WORKERS=4 
-DATABRICKS_SPARK_CONF='{"spark.speculation":"true","spark.databricks.delta.preview.enabled":"true"}'
+DATABRICKS_SPARK_CONF="{\"spark.speculation\":\"true\",\"spark.databricks.delta.preview.enabled\":\"true\",\"spark.hadoop.fs.azure.account.auth.type.$STORAGE_ACCT.dfs.core.windows.net\": \"OAuth\",\"spark.hadoop.fs.azure.account.oauth.provider.type.$STORAGE_ACCT.dfs.core.windows.net\":\"org.apache.hadoop.fs.azurebfs.oauth2.ClientCredsTokenProvider\",\"spark.hadoop.fs.azure.account.oauth2.client.endpoint.$STORAGE_ACCT.dfs.core.windows.net\":\"https://login.microsoftonline.com/$ARM_TENANT_ID/oauth2/token\",\"spark.hadoop.fs.azure.account.oauth2.client.id.$STORAGE_ACCT.dfs.core.windows.net\": \"$ARM_CLIENT_ID\",\"spark.hadoop.fs.azure.account.oauth2.client.secret.$STORAGE_ACCT.dfs.core.windows.net\": \"$ARM_CLIENT_SECRET\"}"
 DATABRICKS_AUTO_TERMINATE_MINUTES=60
 # DATABRICKS_INIT_SCRIPT='[ { "dbfs": { "destination": "dbfs:/databricks/scripts/tpcds-install.sh" } } ]'
-DATABRICKS_INIT_SCRIPT="[ { \"abfss\": { \"destination\": \"abfss://script@$STORAGE_ACCT.blob.core.windows.net/$initScriptName?$SAS\" } } ]"
+DATABRICKS_INIT_SCRIPT="[ { \"abfss\": { \"destination\": \"abfss://script@$STORAGE_ACCT.dfs.core.windows.net/$initScriptName\" } } ]"
 DATABRICKS_CLUSTER_LOG='{ "dbfs": { "destination": "dbfs:/cluster-logs" } } '
-DATABRICKS_SPARK_LIBRARY='[ { "jar": "dbfs:/databricks/jars/spark-sql-perf_2.12-0.5.1-SNAPSHOT.jar" } ]'
+# DATABRICKS_SPARK_LIBRARY='[ { "jar": "dbfs:/databricks/jars/spark-sql-perf_2.12-0.5.1-SNAPSHOT.jar" } ]'
+DATABRICKS_SPARK_LIBRARY="[ { \"jar\": \"abfss://jar@$STORAGE_ACCT.dfs.core.windows.net/spark-sql-perf_2.12-0.5.1-SNAPSHOT.jar\" } ]"
 DATABRICKS_CLUSTER_ID="tpcds-db-cluster-id"
-
-
-######################################################################################
-# Get Service Principal Info
-######################################################################################
-echo "Retrieving Service Principal Info ......"
-APP_SPN_NAME=$(terraform output -state=Terraform/terraform.tfstate -raw sp_name 2>&1)
-
-ARM_OBJECT_ID=$(az keyvault secret show --name $ARM_SPN_OBJECT --vault-name $KEY_VAULT --query value -o tsv)
-ARM_CLIENT_ID=$(az keyvault secret show --name $ARM_SPN_CLIENT --vault-name $KEY_VAULT --query value -o tsv)
-ARM_TENANT_ID=$(az keyvault secret show --name $ARM_SPN_TENANT --vault-name $KEY_VAULT --query value -o tsv)
-ARM_CLIENT_SECRET=$(az keyvault secret show --name $ARM_SPN_CREDENTIAL --vault-name $KEY_VAULT --query value -o tsv)
 
 ######################################################################################
 # Get Notebook Info
@@ -144,31 +145,33 @@ find . -type f -name "$libraryJar" -print0 | while IFS= read -r -d '' file; do
     filename=${file//$replaceSource/$replaceDest}
     echo "New filename: $filename"
 
-    echo "curl -F path=$libraryPath/$filename -F content=@$filename https://$workspaceUrl/api/2.0/dbfs/put"
+#   echo "curl -F path=$libraryPath/$filename -F content=@$filename https://$workspaceUrl/api/2.0/dbfs/put"
+#
+#   curl -n https://$workspaceUrl/api/2.0/dbfs/put \
+#       -H "Authorization:Bearer $token" \
+#       -H "X-Databricks-Azure-SP-Management-Token: $mgmt_access_token" \
+#       -H "X-Databricks-Azure-Workspace-Resource-Id: $workspaceId" \
+#       -F overwrite=true \
+#       -F path="$libraryPath/$filename" \
+#       -F content=@"$filename"       
+#
+#   echo ""
 
-    curl -n https://$workspaceUrl/api/2.0/dbfs/put \
-        -H "Authorization:Bearer $token" \
-        -H "X-Databricks-Azure-SP-Management-Token: $mgmt_access_token" \
-        -H "X-Databricks-Azure-Workspace-Resource-Id: $workspaceId" \
-        -F overwrite=true \
-        -F path="$libraryPath/$filename" \
-        -F content=@"$filename"       
-
-    echo ""
+    azcopy copy "$libraryJar" "https://${STORAGE_ACCT}.blob.core.windows.net/jar/${libraryJar}?${SAS_JAR}"
 
 done
 
 ######################################################################################
 # List library jars
 ######################################################################################
-echo "curl https://$workspaceUrl/api/2.0/dbfs/list -d $libraryPathJson"
-
-curl -X GET https://$workspaceUrl/api/2.0/dbfs/list \
-        -H "Authorization:Bearer $token" \
-        -H "X-Databricks-Azure-SP-Management-Token: $mgmt_access_token" \
-        -H "X-Databricks-Azure-Workspace-Resource-Id: $workspaceId" \
-        -H "Content-Type: application/json" \
-        --data "$libraryPathJson"
+# echo "curl https://$workspaceUrl/api/2.0/dbfs/list -d $libraryPathJson"
+# 
+# curl -X GET https://$workspaceUrl/api/2.0/dbfs/list \
+#         -H "Authorization:Bearer $token" \
+#         -H "X-Databricks-Azure-SP-Management-Token: $mgmt_access_token" \
+#         -H "X-Databricks-Azure-Workspace-Resource-Id: $workspaceId" \
+#         -H "Content-Type: application/json" \
+#         --data "$libraryPathJson"
 echo ""
 echo "Complete uploading library jar ......"
 
@@ -210,7 +213,7 @@ find . -type f -name "$initScriptName" -print0 | while IFS= read -r -d '' file; 
 #
 #    echo ""
 
-    azcopy copy "$initScriptName" "https://${STORAGE_ACCT}.blob.core.windows.net/script/${initScriptName}?${SAS}"
+    azcopy copy "$initScriptName" "https://${STORAGE_ACCT}.blob.core.windows.net/script/${initScriptName}?${SAS_SCRIPT}"
 
 done
 
@@ -360,7 +363,7 @@ while :
 		break	
 	fi
 
-	sleep 15
+	sleep 30
 done
 
 echo "Cluster creation is complete ......"
@@ -389,7 +392,8 @@ echo $libraryResponse
 echo "Waiting for the installtion of the spark perf library ......" 
 
 clusterStatusJson="{ \"cluster_id\" : \"$clusterId\" }"
-jarName="\"dbfs:/databricks/jars/spark-sql-perf_2.12-0.5.1-SNAPSHOT.jar"\"
+#jarName="\"dbfs:/databricks/jars/spark-sql-perf_2.12-0.5.1-SNAPSHOT.jar"\"
+jarName="\"abfss://jar@$STORAGE_ACCT.dfs.core.windows.net/spark-sql-perf_2.12-0.5.1-SNAPSHOT.jar\""
 installed="\"INSTALLED"\"
 
 while :
@@ -408,7 +412,7 @@ while :
 		break	
 	fi
 
-	sleep 15
+	sleep 30
 done
 
 
@@ -457,7 +461,7 @@ while :
 		break	
 	fi
 
-	sleep 15
+	sleep 30
 done
 
 ######################################################################################
@@ -545,7 +549,7 @@ while :
 		break	
 	fi
 
-	sleep 10
+	sleep 60
 done
 
 echo "TPC DS Job Status : $dresState, check further details on databricks logs and storage account for the dataset generated ......"

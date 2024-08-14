@@ -292,6 +292,16 @@ resource "azurerm_storage_data_lake_gen2_filesystem" "datalake-script" {
   depends_on = [ azurerm_storage_account.datalake, azurerm_role_assignment.adls-user-permissions ]
 }
 
+// Storage Container for jar
+//   Azure: https://docs.microsoft.com/en-us/azure/storage/blobs/storage-blobs-introduction
+//   Terraform: https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/storage_data_lake_gen2_filesystem
+resource "azurerm_storage_data_lake_gen2_filesystem" "datalake-jar" {
+  name               = "jar"
+  storage_account_id = azurerm_storage_account.datalake.id
+  
+  depends_on = [ azurerm_storage_account.datalake, azurerm_role_assignment.adls-user-permissions ]
+}
+
 // Create a Private Endpoint for Blob
 //   Azure: https://docs.microsoft.com/en-us/azure/storage/common/storage-private-endpoints
 //   Terraform: https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/private_endpoint
