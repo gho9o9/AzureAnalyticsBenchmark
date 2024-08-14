@@ -184,6 +184,7 @@ fi
 
 USER_OBJECT_ID=$(az ad signed-in-user show --query id --output tsv)
 az role assignment create --role "Key Vault Administrator" --assignee $USER_OBJECT_ID --scope /subscriptions/$ARM_SUBSCRIPTION_ID/resourceGroups/$RESOURCE_GROUP/providers/Microsoft.KeyVault/vaults/$KEY_VAULT
+az role assignment create --role "Key Vault Secrets User" --assignee $ARM_CLIENT_ID  --scope /subscriptions/$ARM_SUBSCRIPTION_ID/resourceGroups/$RESOURCE_GROUP/providers/Microsoft.KeyVault/vaults/$KEY_VAULT
 
 az keyvault secret set  --name $ARM_SPN_CREDENTIAL --value $ARM_CLIENT_SECRET --vault-name $KEY_VAULT
 az keyvault secret set --name $ARM_SPN_OBJECT --value $ARM_OBJECT_ID --vault-name $KEY_VAULT
