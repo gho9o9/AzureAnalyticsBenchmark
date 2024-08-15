@@ -583,7 +583,8 @@ FROM 'abfss://<container>@<account>.dfs.core.windows.net/raw/tpc-ds/source_files
 FILEFORMAT = PARQUET;
 ```
 
-![](images/o9o9_2023-08-03-13-40-19.png)
+![](images/o9o9_2024-08-15-11-06-34.png)  
+![](images/o9o9_2023-08-03-13-40-19.png)  
 
 > ※ データソースのファイルが空ファイルの場合はデータロードが以下のエラーで失敗します。
 > *Exception thrown in awaitResult: [CANNOT_READ_FILE_FOOTER] Could not read footer for file: fcfs-abfss://data@tcpdstpcdsacctpoc.dfs.core.windows.net/raw/tpc-ds/source_files_010GB_parquet/income_band/part-00000-tid-6248170554742552544-e591de2f-0760-4038-a681-7a18ec27d774-572-1-c000.snappy.parquet.*
