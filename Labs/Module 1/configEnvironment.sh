@@ -210,7 +210,7 @@ echo "Assign the Azure Synapse Administrator Role to SPN"
 az synapse role assignment create --workspace-name $synapseAnalyticsWorkspaceName \
 	--role "Synapse Administrator" --assignee "$ARM_OBJECT_ID"
 	
-az keyvault set-policy -n $KEY_VAULT --secret-permissions all --application-id $ARM_CLIENT_ID --object-id $ARM_OBJECT_ID 
+# az keyvault set-policy -n $KEY_VAULT --secret-permissions all --application-id $ARM_CLIENT_ID --object-id $ARM_OBJECT_ID 
 
 echo "Configuration complete!" | tee -a configEnvironment.log
 

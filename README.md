@@ -60,12 +60,30 @@ bash configEnvironment.sh
 
 ### Fabric Warehouse と Fabric Lakehouse
 Fabric GUI からそれぞれのリソースをデプロイします。
-![](images/o9o9_2023-07-31-15-08-21.png)
+![](images/o9o9_2023-07-31-15-08-21.png)  
+
+Lakehouse は [NEE（プレビュー）](https://fabric.guru/eli5-what-is-native-execution-engine-in-fabric) を有効化します。
+
+![](images/o9o9_2024-08-15-09-04-44.png)  
+![](images/o9o9_2024-08-15-09-05-58.png)  
+
+- "spark.gluten.enabled": "true"
+- "spark.shuffle.manager": "org.apache.spark.shuffle.sort.ColumnarShuffleManager"
+
+![](images/o9o9_2024-08-15-10-03-33.png)  
+![](images/o9o9_2024-08-15-10-04-25.png)  
+![](images/o9o9_2024-08-15-10-04-53.png)  
 
 ### Databricks SQL
-Azure Portal から Databricks（Premium SKU）をデプロイします。Databricks SQL には Premium SKU が必要です。
-![](images/o9o9_2023-07-31-15-10-39.png)
-  
+Azure Portal から Databricks ワークスペース（Premium SKU）をデプロイします。Databricks SQL には Premium SKU が必要です。  
+![](images/o9o9_2023-07-31-15-10-39.png)  
+
+Databricks のデプロイのち、SQL Warehouse を作成します。  
+![](images/o9o9_2024-08-15-10-29-47.png)  
+
+ワークスペース に Unity Catalog をアタッチします。
+![](images/o9o9_2024-08-15-10-45-27.png)  
+
 ## 2-3. データ生成
 
 <!-- 
@@ -87,6 +105,7 @@ bash tpcdsDataGeneration.sh 100
 
 参考：スケールに応じたデータ件数とサイズ  
 ![](images/o9o9_2024-08-14-09-34-00.png)  
+
 
 <!--
 ![](https://media.licdn.com/dms/image/D5612AQEBRda1pnSpnA/article-inline_image-shrink_1500_2232/0/1654805954089?e=1695859200&v=beta&t=uZ9wUBfXodX3Ly0eaTAeTLJJV-4-UwXiiksyjSbrFI8)
@@ -317,7 +336,12 @@ WITH (CREDENTIAL=(IDENTITY= 'Storage Account Key', SECRET='<secret>'), FILE_TYPE
 ![](images/o9o9_2023-08-03-13-30-30.png)
 
 ### Fabric Lakehouse
-データロード内のストレージアカウント名とデータソースへのパスを環境に応じて適宜修正したのち、ノートブックに貼り付け順次実行します。該当スクリプトは冪等で実装されているため、テストデータを格納するストレージロケーションやデータサイズの変更時などで繰り返し実行可能です。  
+今回は TPCDS データを格納したストレージを Fabrick Lakehouse へショートカットとしてアタッチし、アタッチしたストレージを Onelake 経由で ロードします。
+
+![](images/o9o9_2024-08-15-10-19-13.png)  
+![](images/o9o9_2024-08-15-10-19-44.png)  
+
+データロードスクリプト内のデータソースパスを適宜修正したのち実行します。該当スクリプトは冪等で実装されているため、テストデータを格納するストレージロケーションやデータサイズの変更時などで繰り返し実行可能です。  
 
 - [1. クリーンアップ](https://app.fabric.microsoft.com/groups/70bb9150-59cd-4789-af81-b5835704bbca/synapsenotebooks/18b3bb71-7daf-48ed-b2b5-cfd37aae6a2d?experience=data-warehouse)
 - [2. スキーマ定義 & データロード](https://app.fabric.microsoft.com/groups/70bb9150-59cd-4789-af81-b5835704bbca/synapsenotebooks/ae6afd8a-1b03-45eb-a969-bb4135032ba3?experience=data-warehouse)
