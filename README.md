@@ -620,6 +620,11 @@ bash benchmark.sh <aaduser> <password>
 
 # 補足
 
+## Entra ID MFA 必須環境下での sqlcmd の実行
+[非対話型では Entra ID MFA 認証に対応できない](https://learn.microsoft.com/ja-jp/sql/tools/sqlcmd/sqlcmd-authentication?view=sql-server-ver16&tabs=odbc#microsoft-entra-interactive-authentication)ため、[Entra ID 管理センター](https://aad.portal.azure.com/)にてベンチマークに使用するユーザーを MFA の条件付きアクセスから一時的に除外します。  
+
+![](images/o9o9_2024-08-15-13-40-38.png)  
+
 ## ベンチマーク対象に応じた TPCDS クエリの微修正
 
 - ベース

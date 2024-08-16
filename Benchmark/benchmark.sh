@@ -18,7 +18,7 @@ DB_SQL_DIR="./query/databricks"
 LOG_DIR="./log"
 LOG_FILE="benchmark.csv"
 LOG_PATH=$LOG_DIR/$LOG_FILE
-HEADER="query,index,sec"
+HEADER="date,query,count,sec"
 
 mkdir -p $LOG_DIR
 touch $LOG_PATH
